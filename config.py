@@ -12,6 +12,8 @@ try:
     from dotenv import load_dotenv
 except ImportError:
     def load_dotenv(path: Path) -> None:
+        """Minimal .env loader used when python-dotenv is unavailable."""
+
         if not path.exists():
             return
         for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -37,6 +39,8 @@ T = TypeVar("T")
 
 
 def _first_env(*names: str, default: str | None = None) -> str | None:
+    """Return the first non-empty environment value from a list of names."""
+
     for name in names:
         value = os.getenv(name)
         if value:
@@ -45,12 +49,16 @@ def _first_env(*names: str, default: str | None = None) -> str | None:
 
 
 def _truthy(value: str | None, default: bool = True) -> bool:
+    """Parse a common truthy/falsy environment value."""
+
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def _optional_int(value: str | None) -> int | None:
+    """Parse a positive integer or return None for blank values."""
+
     if not value:
         return None
     try:
@@ -61,11 +69,15 @@ def _optional_int(value: str | None) -> int | None:
 
 
 def _slug(value: str) -> str:
+    """Create a stable lowercase slug for derived Prompt Hub names."""
+
     return re.sub(r"[^a-z0-9-]+", "-", value.lower()).strip("-") or "day22"
 
 
 @dataclass(frozen=True)
 class Settings:
+    """Typed configuration used by every lab step."""
+
     langsmith_api_key: str | None
     langsmith_endpoint: str
     langsmith_project: str
@@ -178,6 +190,8 @@ def configure_langsmith_tracing(settings: Settings) -> None:
 
 
 def make_llm(settings: Settings, *, temperature: float = 0.0):
+    """Create the configured chat model client."""
+
     from langchain_openai import ChatOpenAI
 
     kwargs = {
@@ -191,6 +205,8 @@ def make_llm(settings: Settings, *, temperature: float = 0.0):
 
 
 def make_embeddings(settings: Settings):
+    """Create the configured embedding model client."""
+
     from langchain_openai import OpenAIEmbeddings
 
     kwargs = {
@@ -203,6 +219,8 @@ def make_embeddings(settings: Settings):
 
 
 def make_langsmith_client(settings: Settings):
+    """Create a LangSmith client for Prompt Hub operations."""
+
     from langsmith import Client
 
     kwargs = {"api_key": settings.langsmith_api_key}
@@ -216,16 +234,22 @@ def make_langsmith_client(settings: Settings):
 
 
 def load_knowledge_base() -> str:
+    """Read the local RAG knowledge base."""
+
     if not KNOWLEDGE_BASE_PATH.exists():
         raise FileNotFoundError(f"Knowledge base not found: {KNOWLEDGE_BASE_PATH}")
     return KNOWLEDGE_BASE_PATH.read_text(encoding="utf-8")
 
 
 def limit_items(items: Sequence[T], limit: int | None) -> list[T]:
+    """Apply an optional item limit for local smoke tests."""
+
     return list(items[:limit]) if limit else list(items)
 
 
 def print_config_summary(settings: Settings) -> None:
+    """Print non-secret configuration values for setup verification."""
+
     print("Config loaded successfully")
     print(f"   LangSmith project : {settings.langsmith_project}")
     print(f"   LangSmith endpoint: {settings.langsmith_endpoint}")
@@ -241,6 +265,8 @@ def print_config_summary(settings: Settings) -> None:
 
 
 def ensure_directories(paths: Iterable[Path] = (DATA_DIR, EVIDENCE_DIR)) -> None:
+    """Create output directories used by the lab scripts."""
+
     for path in paths:
         path.mkdir(parents=True, exist_ok=True)
 

@@ -27,12 +27,16 @@ except ImportError:
 
 
 def _pass(value: str | None = None):
+    """Return a Guardrails PassResult, optionally overriding the output value."""
+
     if value is None:
         return PassResult()
     return PassResult(value_override=value)
 
 
 def _fail(message: str, fix_value: str):
+    """Return a version-compatible Guardrails FailResult with a fix value."""
+
     try:
         return FailResult(error_message=message, fix_value=fix_value)
     except TypeError:
@@ -53,6 +57,8 @@ class PIIDetector(Validator):
     }
 
     def validate(self, value: str, metadata: dict[str, Any]):
+        """Redact detected PII or pass through clean text unchanged."""
+
         redacted = value
         found: list[str] = []
 
@@ -74,6 +80,8 @@ class JSONFormatter(Validator):
 
     @staticmethod
     def _repair(text: str) -> str:
+        """Apply simple repairs for common malformed JSON responses."""
+
         repaired = text.strip()
         repaired = re.sub(r"^```(?:json)?\s*", "", repaired, flags=re.IGNORECASE)
         repaired = re.sub(r"\s*```$", "", repaired)
@@ -83,6 +91,8 @@ class JSONFormatter(Validator):
         return repaired
 
     def validate(self, value: str, metadata: dict[str, Any]):
+        """Validate JSON, repair common issues, or return an error JSON string."""
+
         try:
             parsed = json.loads(value)
             return _pass(json.dumps(parsed, indent=2))
@@ -99,14 +109,14 @@ class JSONFormatter(Validator):
 
 
 def _outcome_status(outcome) -> str:
+    """Format a Guardrails validation outcome for the evidence logs."""
+
     return "Pass" if getattr(outcome, "validation_passed", False) else "Fixed/Failed"
 
 
-def _outcome_output(outcome) -> str:
-    return str(getattr(outcome, "validated_output", outcome))
-
-
 def _validator_output(validator: Validator, text: str) -> str:
+    """Compute the repaired output consistently across Guardrails versions."""
+
     result = validator.validate(text, {})
     fix_value = getattr(result, "fix_value", None)
     if fix_value is not None:
@@ -120,11 +130,15 @@ def _validator_output(validator: Validator, text: str) -> str:
 
 
 def _emit(lines: list[str], line: str = "") -> None:
+    """Print a log line and keep it for evidence file output."""
+
     print(line)
     lines.append(line)
 
 
 def demo_pii_guard() -> None:
+    """Run the PII detector demo cases and save the evidence log."""
+
     lines: list[str] = []
     validator = PIIDetector(on_fail=OnFailAction.FIX)
     guard = Guard().use(validator)
@@ -152,6 +166,8 @@ def demo_pii_guard() -> None:
 
 
 def demo_json_guard() -> None:
+    """Run the JSON formatter demo cases and save the evidence log."""
+
     lines: list[str] = []
     validator = JSONFormatter(on_fail=OnFailAction.FIX)
     guard = Guard().use(validator)
@@ -178,6 +194,8 @@ def demo_json_guard() -> None:
 
 
 def main() -> None:
+    """Run both Guardrails validator demos."""
+
     print("=" * 55)
     print("  Step 4: Guardrails AI Validators")
     print("=" * 55)

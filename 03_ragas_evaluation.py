@@ -70,6 +70,8 @@ METRIC_NAMES = ["faithfulness", "answer_relevancy", "context_recall", "context_p
 
 
 def build_vectorstore() -> FAISS:
+    """Build a FAISS index over the shared knowledge base."""
+
     text = load_knowledge_base()
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=settings.chunk_size,
@@ -84,6 +86,8 @@ def build_vectorstore() -> FAISS:
 
 @traceable(name="ragas-rag-query", tags=["ragas", "step3"])
 def run_rag(retriever, llm, prompt, question: str) -> dict[str, list[str] | str]:
+    """Run one traced RAG call and return both answer and retrieved contexts."""
+
     docs = retriever.invoke(question)
     contexts = [doc.page_content for doc in docs]
     context_text = "\n\n".join(contexts)
@@ -94,6 +98,8 @@ def run_rag(retriever, llm, prompt, question: str) -> dict[str, list[str] | str]
 
 
 def collect_rag_outputs(vectorstore: FAISS, prompt_version: str) -> list[dict]:
+    """Collect answers and contexts for all QA pairs using one prompt version."""
+
     retriever = vectorstore.as_retriever(search_kwargs={"k": settings.retrieval_k})
     llm = make_llm(settings)
     prompt = PROMPTS[prompt_version]
@@ -116,6 +122,8 @@ def collect_rag_outputs(vectorstore: FAISS, prompt_version: str) -> list[dict]:
 
 
 def build_ragas_dataset(rag_results: list[dict]):
+    """Convert collected RAG outputs into a RAGAS EvaluationDataset."""
+
     samples = [
         SingleTurnSample(
             user_input=item["question"],
@@ -129,6 +137,8 @@ def build_ragas_dataset(rag_results: list[dict]):
 
 
 def _metric_values(result, metric_name: str) -> list[float]:
+    """Extract numeric metric values across supported RAGAS result shapes."""
+
     try:
         raw = result[metric_name]
     except Exception:
@@ -153,6 +163,8 @@ def _metric_values(result, metric_name: str) -> list[float]:
 
 
 def run_ragas_eval(rag_results: list[dict], version: str) -> dict[str, float]:
+    """Evaluate one prompt version and return mean scores for each metric."""
+
     print(f"\nRunning RAGAS evaluation for prompt {version} ...")
     dataset = build_ragas_dataset(rag_results)
     result = evaluate(
@@ -172,6 +184,8 @@ def run_ragas_eval(rag_results: list[dict], version: str) -> dict[str, float]:
 
 
 def _print_comparison(v1_scores: dict[str, float], v2_scores: dict[str, float]) -> None:
+    """Print a side-by-side V1/V2 metric comparison table."""
+
     print("\nRAGAS comparison")
     print("-" * 60)
     print(f"{'Metric':24s} {'V1':>10s} {'V2':>10s} {'Winner':>10s}")
@@ -185,6 +199,8 @@ def _print_comparison(v1_scores: dict[str, float], v2_scores: dict[str, float]) 
 
 
 def main() -> None:
+    """Run both prompt versions through RAGAS and save the JSON report."""
+
     print("=" * 60)
     print("  Step 3: RAGAS Evaluation")
     print("=" * 60)

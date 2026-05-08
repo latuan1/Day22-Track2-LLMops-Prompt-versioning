@@ -55,6 +55,8 @@ def build_vectorstore() -> FAISS:
 
 
 def _format_docs(docs) -> str:
+    """Join retrieved documents into the context string consumed by the prompt."""
+
     return "\n\n".join(doc.page_content for doc in docs)
 
 
@@ -80,6 +82,8 @@ def ask(chain, question: str) -> str:
 
 
 def main() -> None:
+    """Run all Step 1 questions through the traced RAG pipeline."""
+
     print("=" * 60)
     print("  Step 1: LangSmith RAG Pipeline")
     print("=" * 60)

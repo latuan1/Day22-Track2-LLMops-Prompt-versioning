@@ -90,6 +90,8 @@ def get_prompt_version(request_id: str) -> str:
 
 
 def build_vectorstore() -> FAISS:
+    """Build a FAISS index over the shared knowledge base."""
+
     text = load_knowledge_base()
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=settings.chunk_size,
@@ -104,6 +106,8 @@ def build_vectorstore() -> FAISS:
 
 @traceable(name="ab-rag-query", tags=["ab-test", "step2"])
 def ask_ab(retriever, llm, prompt, question: str, version: str) -> dict[str, str]:
+    """Run one traced RAG query with the selected prompt version."""
+
     docs = retriever.invoke(question)
     context = "\n\n".join(doc.page_content for doc in docs)
     answer = (prompt | llm | StrOutputParser()).invoke({"context": context, "question": question})
@@ -111,6 +115,8 @@ def ask_ab(retriever, llm, prompt, question: str, version: str) -> dict[str, str
 
 
 def main() -> None:
+    """Push/pull prompts, route all questions, and save the A/B log."""
+
     print("=" * 60)
     print("  Step 2: Prompt Hub A/B Routing")
     print("=" * 60)

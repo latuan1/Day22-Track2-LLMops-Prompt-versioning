@@ -19,14 +19,18 @@ STEPS = {
 
 
 def run_step(step: str) -> None:
+    """Run one lab step as a subprocess."""
+
     script = PROJECT_ROOT / STEPS[step]
-    print("\n" + "=" * 70)
-    print(f"Running step {step}: {script.name}")
-    print("=" * 70)
+    print("\n" + "=" * 70, flush=True)
+    print(f"Running step {step}: {script.name}", flush=True)
+    print("=" * 70, flush=True)
     subprocess.run([sys.executable, str(script)], cwd=PROJECT_ROOT, check=True)
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line options for running one step or all steps."""
+
     parser = argparse.ArgumentParser(description="Run the Day 22 LangSmith/RAG lab.")
     parser.add_argument(
         "--step",
@@ -38,6 +42,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run the selected lab step sequence."""
+
     args = parse_args()
     selected_steps = list(STEPS) if args.step == "all" else [args.step]
     for step in selected_steps:
