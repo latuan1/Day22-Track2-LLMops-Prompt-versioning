@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-05-08T04:50:44.491264+00:00",
+  "question_count": 50,
+  "prompt_v1_scores": {
+    "faithfulness": 0.9497777777777777,
+    "answer_relevancy": 0.9341179822830593,
+    "context_recall": 0.96,
+    "context_precision": 0.962585033920068
+  },
+  "prompt_v2_scores": {
+    "faithfulness": 0.7002170731762569,
+    "answer_relevancy": 0.9246401458158858,
+    "context_recall": 0.98,
+    "context_precision": 0.9625850339210885
+  },
+  "best_faithfulness": 0.9497777777777777,
+  "target_met": true,
+  "settings": {
+    "llm_model": "gpt-4o",
+    "embedding_model": "text-embedding-3-small",
+    "chunk_size": 500,
+    "chunk_overlap": 50,
+    "retrieval_k": 3
+  }
+}

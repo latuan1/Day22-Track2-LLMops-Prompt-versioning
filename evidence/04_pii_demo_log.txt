@@ -1,0 +1,27 @@
+=======================================================
+PII Detection Demo
+=======================================================
+
+[Clean] Pass
+Input : No sensitive information in this text.
+Output: No sensitive information in this text.
+
+[Email] Pass
+Input : Contact John at john.doe@example.com for details.
+Output: Contact John at [REDACTED] for details.
+
+[Phone] Pass
+Input : Call our support line at (555) 867-5309.
+Output: Call our support line at [REDACTED].
+
+[SSN] Pass
+Input : Patient SSN is 123-45-6789 on file.
+Output: Patient SSN is [REDACTED] on file.
+
+[Credit Card] Pass
+Input : Payment made with card 4532 1234 5678 9010.
+Output: Payment made with card [REDACTED].
+
+[Multi-PII] Pass
+Input : Email alice@example.com or call 555-123-4567.
+Output: Email [REDACTED] or call [REDACTED].
